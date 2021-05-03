@@ -1,3 +1,30 @@
+# Characterization methylation differences genome-wide
+for i in TKOlike.bw DKOzero_P15.bw; do
+	n=`basename $i | sed 's/.bw//'`
+	bigWigAverageOverBed ${i} w1000.bed ${n}_1kb.tsv
+done
+
+```R
+require(ggplot2)
+require(reshape2)
+
+# load data
+TKO <- read.table('TKOlike_1kb.tsv', header=F, col.names=c('name','size','covered','sum','mean0','TKO'))
+DKO <- read.table('/DKOzero_P15_1kb.tsv', header=F, col.names=c('name','size','covered','sum','mean0','DKO'))
+
+df <- merge(subset(TKO, covered>=5)[,c(1,6)], subset(DKO, covered>=5)[,c(1,6)], by='name')
+df$d <- df$DKO-df$TKO
+
+pdf('figures/TKO_DKO_1kb_methylation_density.pdf', width=14)
+ggplot(melt(df[,c(1:3)]), aes(x=value, color=variable)) + geom_line(stat='density', adjust=0.05) + theme_classic() + facet_wrap(~variable, scales='free_y') + xlim(c(0,0.5)) + geom_vline(xintercept=c(0.05))
+dev.off()
+
+pdf('figures/TKO_DKO_1kb_methylation_difference_ecf.pdf')
+ggplot(df, aes(d)) + stat_ecdf(size=2) + theme_classic() + geom_hline(yintercept=0.95, color='grey') + geom_vline(xintercept=0.1, color='grey') + xlim(c(0,0.5))
+dev.off()
+```
+
+
 # DMR calling
 
 ## sliding window w 1000 s 250
