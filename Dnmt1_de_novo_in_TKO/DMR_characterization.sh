@@ -85,4 +85,16 @@ deeptools/bin/plotProfile \
 --colors 'grey' 'orange' 'green'
 
 
+# Clonal behaviour
+bedtools unionbedg -header -names scIAP-1 scIAP-2 scIAP-3 scIAP-4 scIAP-5 scIAP-6 scIAP-7 scIAP-8 scIAP-9 -i DKOzero-p5-scIAP-1.bedgraph DKOzero-p5-scIAP-2.bedgraph DKOzero-p5-scIAP-3.bedgraph DKOzero-p5-scIAP-4.bedgraph DKOzero-p5-scIAP-5.bedgraph DKOzero-p5-scIAP-6.bedgraph DKOzero-p5-scIAP-7.bedgraph DKOzero-p5-scIAP-8.bedgraph DKOzero-p5-scIAP-9.bedgraph >clones.bedgraph
 
+```R
+require(ggplot2)
+require(reshape2)
+
+data <- read.table('clones.bedgraph', header=T)
+
+pdf('figures/clones.pdf')
+ggplot(melt(data[,-2], id.vars=c('chrom','end')), aes(x=end, y=value, color=variable)) + geom_point(shape=4, size=3) + geom_line() + theme_classic() + ylim(c(0,0.15)) + ylab('Methylation') + xlab('CpG position')
+dev.off()
+```
