@@ -98,3 +98,18 @@ pdf('figures/clones.pdf')
 ggplot(melt(data[,-2], id.vars=c('chrom','end')), aes(x=end, y=value, color=variable)) + geom_point(shape=4, size=3) + geom_line() + theme_classic() + ylim(c(0,0.15)) + ylab('Methylation') + xlab('CpG position')
 dev.off()
 ```
+
+# Methylation gain per CpG in DMRs
+bedtools intersect -u -b ../DKO_TKO_DMRs_numerated_v3.bed -a TKOlike.bed | bedtools intersect -wa -wb -a stdin -b DKOzero_P15.bed | cut -f4,8 >TKO_DKO_CpGs_DMRs.txt
+
+```R
+require(ggplot2)
+library(ggrastr)
+
+data <- read.table('TKO_DKO_CpGs_DMRs.txt', header=T, col.names=c('TKO','DKO'))
+data$remaining <- ifelse(data$TKO == 0, 'zero', ifelse(data$TKO <= 0.00276673, 'conversionfail', 'residual'))
+
+pdf('figures/TKO_DKO_delta_DMR_CpG_scatter.pdf')
+ggplot(data, aes(x=TKO, y=DKO-TKO, color=remaining)) + rasterise(geom_point(), dpi=600) + theme_classic() + scale_color_manual(values=c('grey','black'))
+dev.off()
+```
