@@ -83,3 +83,59 @@ for r in {1..1000}; do
 done >DKO_TKO_CRs_numerated_v1.bed
 
 
+# DMR and CR length and differences
+bedtools intersect -wao -a DKO_TKO_DMRs_numerated_v1.bed -b DKO_TKO_diff.bed | bedtools groupby -g 1,2,3,4 -c 8,9 -o mean,count | perl -ane 'BEGIN{print "#chr\tstart\tend\tID\tdiff\tCpG\tlength\n"}; $l=$F[2]-$F[1]; print "$F[0]\t$F[1]\t$F[2]\t$F[3]\t$F[4]\t$F[5]\t$l\n"' >DKO_TKO_DMRs_length.txt
+bedtools intersect -wao -a DKO_TKO_CRs_numerated_v1.bed -b DKO_TKO_diff.bed | bedtools groupby -g 1,2,3,4 -c 8,9 -o mean,count | perl -ane 'BEGIN{print "#chr\tstart\tend\tID\tdiff\tCpG\tlength\n"}; $l=$F[2]-$F[1]; print "$F[0]\t$F[1]\t$F[2]\t$F[3]\t$F[4]\t$F[5]\t$l\n"' >DKO_TKO_CRs_length.txt
+bedtools intersect -wao -a cr_matching_cpg_num/DKO_TKO_CRs_CpGdensity_v1.bed -b DKO_TKO_diff.bed | bedtools groupby -g 1,2,3,4 -c 8,9 -o mean,count | perl -ane 'BEGIN{print "#chr\tstart\tend\tID\tdiff\tCpG\tlength\n"}; $l=$F[2]-$F[1]; print "$F[0]\t$F[1]\t$F[2]\t$F[3]\t$F[4]\t$F[5]\t$l\n"' >DKO_TKO_CRs2_length.txt
+
+bedtools intersect -wao -a w2000_s500.bed -b DKO_TKO_diff.bed | bedtools groupby -g 1,2,3,4 -c 8,9 -o mean,count | perl -ane 'BEGIN{print "#chr\tstart\tend\tID\tdiff\tCpG\tlength\n"}; $l=$F[2]-$F[1]; print "$F[0]\t$F[1]\t$F[2]\t$F[3]\t$F[4]\t$F[5]\t$l\n"' >DKO_TKO_w_length.txt
+
+
+```R
+require(ggplot2)
+require(ggExtra)
+
+DMRs <- read.table('DKO_TKO_DMRs_length.txt', header=T, comment.char='')
+CRs <- read.table('DKO_TKO_CRs_length.txt', header=T, comment.char='')
+CRs2 <- read.table('DKO_TKO_CRs2_length.txt', header=T, comment.char='')
+
+p <- ggplot(DMRs, aes(x=length, y=CpG, color=diff)) + geom_point() + theme_classic() + xlim(c(0,22000)) + ylim(c(0,450)) + scale_color_gradientn(colours = c('darkblue','gray90','firebrick3'), limits=c(-0.35,0.35), space='Lab') + xlab('DMR length [nt]') + ylab('DMR length [CpGs]') + geom_abline(intercept=0, slope=c(0.005, 0.008))
+
+pdf('figures/DKO_TKO_DMRs_length.pdf')
+ggMarginal(p, size=4, xparams = list(size = 1), yparams = list(size = 1))
+plot.new()
+ggMarginal(p + theme(legend.position='none'), size=4, xparams = list(size = 1), yparams = list(size = 1))
+dev.off()
+
+
+set.seed(12)
+x <- table(DMRs$length)
+subCRs <- data.frame(X.chr=factor(), start=integer(), end=integer(), ID=integer(), diff=numeric(), CpG=integer(), length=integer())
+for (i in 1:length(x)){
+	subCRs <- rbind(subCRs, CRs[sample(which(CRs$length == as.numeric(names(x[i]))), x[i]), ])
+}
+
+p <- ggplot(subCRs, aes(x=length, y=CpG, color=diff)) + geom_point() + theme_classic() + xlim(c(0,22000)) + ylim(c(0,450)) + scale_color_gradientn(colours = c('darkblue','gray90','firebrick3'), limits=c(-0.35,0.35), space='Lab') + xlab('CR length [nt]') + ylab('CR length [CpGs]') + geom_abline(intercept=0, slope=c(0.005, 0.008))
+
+pdf('figures/DKO_TKO_CRs_length.pdf')
+ggMarginal(p, size=4, xparams = list(size = 1), yparams = list(size = 1))
+plot.new()
+ggMarginal(p + theme(legend.position='none'), size=4, xparams = list(size = 1), yparams = list(size = 1))
+dev.off()
+
+
+set.seed(12)
+x <- table(DMRs$length)
+subCRs <- data.frame(X.chr=factor(), start=integer(), end=integer(), ID=integer(), diff=numeric(), CpG=integer(), length=integer())
+for (i in 1:length(x)){
+	subCRs <- rbind(subCRs, CRs2[sample(which(CRs2$length == as.numeric(names(x[i]))), x[i]), ])
+}
+
+p <- ggplot(subCRs, aes(x=length, y=CpG, color=diff)) + geom_point() + theme_classic() + xlim(c(0,22000)) + ylim(c(0,450)) + scale_color_gradientn(colours = c('darkblue','gray90','firebrick3'), limits=c(-0.35,0.35), space='Lab') + xlab('CR length [nt]') + ylab('CR length [CpGs]') + geom_abline(intercept=0, slope=c(0.005, 0.008))
+
+pdf('figures/DKO_TKO_CRs2_length.pdf')
+ggMarginal(p, size=4, xparams = list(size = 1), yparams = list(size = 1))
+plot.new()
+ggMarginal(p + theme(legend.position='none'), size=4, xparams = list(size = 1), yparams = list(size = 1))
+dev.off()
+```
