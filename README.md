@@ -5,9 +5,9 @@ DNA methylation plays a critical role in development, particularly in repressing
 
 ## Structure
 This repository contains the collection of R scripts used to perform the analysis presented in Haggerty and Kretzmer et al.
-The respository is organized in the following subfolders following the figures and corresponding extended data figures.
+The respository is organized in the following subfolders following the content of the publication.
 
-Source Data files containing the data behind all graphs are either uploaded as Supplementary Tables or are deposited at https://oc-molgen.gnz.mpg.de/owncloud/s/L2ny9JHey232LAe.
+Source Data files containing the data behind the visualizations are either uploaded as Supplementary Tables or are deposited at https://oc-molgen.gnz.mpg.de/owncloud/s/L2ny9JHey232LAe.
 
 
 ## Data availability
